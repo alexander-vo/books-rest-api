@@ -25,11 +25,11 @@ def get_books(search_filter: dict, sort: tuple, pagination: dict) -> List[dict]:
     :param pagination:
     :return: books
     """
-    skip = pagination['page_size'] * (pagination['page'] - 1)
+    skip = pagination.get('page_size', 10) * (pagination.get('page', 1) - 1)
     cursor = mongo.db.books.find(search_filter)
     if sort:
         cursor.sort(*sort)
-    cursor.skip(skip).limit(pagination['page_size'])
+    cursor.skip(skip).limit(pagination.get('page_size', 10))
     return list(cursor)
 
 
@@ -37,13 +37,22 @@ def save_books(books: List[dict]) -> dict:
     """
     Save new books entries and update already existing ones
     :param books:
-    :return: inserted books ids
+    :return: inserted books ids and updated count
     """
+    result = {
+        'inserted_ids': [],
+        'updated_count': 0
+    }
+    # Empty books leads to an empty operations list
+    # what raise InvalidOperation exception
+    if not books:
+        return result
     # Creating list of operations for bulk update operation
     # upsert=True perform an insert if no documents match the filter
-    operations = [UpdateOne({'_id': book['_id']}, book, upsert=True) for book in books]
+    operations = [UpdateOne({'_id': book['_id']}, {'$set': book}, upsert=True) for book in books]
     bulk_results = mongo.db.books.bulk_write(operations)
-    return {
-        'inserted': bulk_results.upserted_ids,
-        'updated': bulk_results.modified_count
-    }
+    result.update({
+        'inserted_ids': list(bulk_results.upserted_ids.values()),
+        'updated_count': bulk_results.modified_count
+    })
+    return result
