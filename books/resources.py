@@ -19,9 +19,8 @@ class Books(Resource):
         pagination = {'page': args['page'], 'page_size': args['page_size']}
 
         # Creating sort dict for published_date field if args['sort'] exists
-        # else sort will be an empty dict
-        sort = {} if not args['sort'] else \
-            {'published_date': 1 if args['sort'].startswith('+') else -1}
+        # else sort will be an None
+        sort = args['sort'] and ('published_date', -1 if args['sort'].startswith('-') else 1)
 
         # Adding filter params if exists
         search_filter = {}

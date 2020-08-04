@@ -15,7 +15,7 @@ def get_book(search_filter: dict) -> dict:
     return mongo.db.books.find_one(search_filter)
 
 
-def get_books(search_filter: dict, sort: dict, pagination: dict) -> List[dict]:
+def get_books(search_filter: dict, sort: tuple, pagination: dict) -> List[dict]:
     """
     Find books by search params in search_filter.
     Sort films by selected field and order in sort
@@ -27,7 +27,8 @@ def get_books(search_filter: dict, sort: dict, pagination: dict) -> List[dict]:
     """
     skip = pagination['page_size'] * (pagination['page'] - 1)
     cursor = mongo.db.books.find(search_filter)
-    cursor.sort(sort)
+    if sort:
+        cursor.sort(*sort)
     cursor.skip(skip).limit(pagination['page_size'])
     return list(cursor)
 
