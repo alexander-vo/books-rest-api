@@ -20,7 +20,7 @@ def create_app(app_config: Type[Config] = Config) -> Flask:
     mongo.init_app(app)
 
     # Creating API object for the Flask app
-    api = Api(app)
+    api = Api(app, prefix='/api')
 
     # Creating custom template for API responses
     # Could also map codes to status_message field like 'success' or 'failure'
@@ -32,7 +32,7 @@ def create_app(app_config: Type[Config] = Config) -> Flask:
         return response
 
     # Adding api resources
-    api.add_resource(Books, '/api/books/')
-    api.add_resource(Book, '/api/books/<string:id>')
+    api.add_resource(Books, '/books/')
+    api.add_resource(Book, '/books/<string:book_id>')
 
     return app
