@@ -3,6 +3,7 @@ import json
 import pytest
 
 from flask import Flask
+from flask.testing import FlaskClient
 
 from books import create_app
 from books.db import mongo
@@ -18,11 +19,12 @@ def app() -> Flask:
     mongo.cx.close()
 
 
-@pytest.fixture(scope='session')
-def client(app: Flask) -> Flask:
+@pytest.fixture(scope='module')
+def client(app: Flask) -> FlaskClient:
     """Returns app test client and loads test data from tests_books.json"""
     with open(os.path.join(TESTS_DIR, 'test_books.json'), 'r') as f:
         data = json.load(f)
     mongo.db.books.insert_many(data)
-    yield app.test_client()
+    with app.test_client() as client:
+        yield client
     mongo.db.books.remove()

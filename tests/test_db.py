@@ -1,11 +1,14 @@
+from typing import List
+
 import pytest
+from flask.testing import FlaskClient
 
 from config import TestingConfig
 from books import db
 
 
 # client var doesn't use but needed for fixture triggering
-def test_db_name(client):
+def test_db_name(client: FlaskClient):
     """
     Testing connected Database name
     :param client: needed to init fixture
@@ -24,7 +27,7 @@ def test_db_name(client):
         ('some_random_string', None)
     ]
 )
-def test_get_book_method(book_id, expected_title):
+def test_get_book_method(book_id: str, expected_title: str):
     """
     Testing search by id. Comparing founded book title
     with expected one
@@ -50,7 +53,7 @@ def test_get_book_method(book_id, expected_title):
         (-3, -5, ['SQz2AAAAQBAJ', 'TdDhBAAAQBAJ', '8KdEAgAAQBAJ', '1rogAgAAQBAJ', '-3HK5oU_OPgC']),
     ]
 )
-def test_get_books_method_pagination(page, page_size, expected_ids):
+def test_get_books_method_pagination(page: int, page_size: int, expected_ids: List[str]):
     """
     Testing pagination with defined page size and page
     :param page: number of page
@@ -76,7 +79,7 @@ def test_get_books_method_pagination(page, page_size, expected_ids):
         (2012, []),
     ]
 )
-def test_get_books_method_search_by_published_date(published_date, expected_ids):
+def test_get_books_method_search_by_published_date(published_date: str, expected_ids: List[str]):
     """
     Testing search by published_date with defined date and expected ids
     :param published_date: Searchable date string
@@ -102,7 +105,7 @@ def test_get_books_method_search_by_published_date(published_date, expected_ids)
         (['David Rogers', 'Ruth Perry'], ['wFMO7R-qvDUC']),
     ]
 )
-def test_get_books_method_search_by_authors(authors, expected_ids):
+def test_get_books_method_search_by_authors(authors: List[str], expected_ids: List[str]):
     """
     Testing search by authors
     :param authors: authors names
@@ -122,7 +125,7 @@ def test_get_books_method_search_by_authors(authors, expected_ids):
         (-1, ['3XGlBAAAQBAJ', 'ariQBAAAQBAJ', 'TdDhBAAAQBAJ', 'glFsAwAAQBAJ', 'arsgAgAAQBAJ']),
     ]
 )
-def test_get_books_method_sorting(order, expected_ids):
+def test_get_books_method_sorting(order: int, expected_ids: List[str]):
     """
     Testing sorting by published_date. Comparing only first 5 entries
     :param order: ASCENDING (1) | DESCEND(-1)
@@ -160,7 +163,7 @@ TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM = [
     'books, expected_results',
     list(zip(TEST_SAVE_BOOKS_BOOKS_PARAM, TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM))
 )
-def test_save_books(books, expected_results):
+def test_save_books(books: List[dict], expected_results: dict):
     """
     Testing insert of new books and update of existing ones
     :param books: New/Changed books
