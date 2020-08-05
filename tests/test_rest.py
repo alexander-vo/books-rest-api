@@ -35,7 +35,7 @@ def test_get_book_by_id_endpoint_fail(client: FlaskClient, book_id: str, expecte
 
 
 @pytest.mark.parametrize(
-    'published_date, authors, sort, page, page_size, expected_status, expected_ids',
+    'published_date, author, sort, page, page_size, expected_status, expected_ids',
     [
         ('2012', None, None, None, None, 200, ['KY0BDObXftUC', 'H8ON-dTgQQYC', 'Wy0svf_7NzsC', 'ouD2ugAACAAJ']),
         ('2001', ['J.R.R. Tolkien'], None, None, None, 200, ['tFWlPwAACAAJ']),
@@ -53,12 +53,12 @@ def test_get_book_by_id_endpoint_fail(client: FlaskClient, book_id: str, expecte
 
     ]
 )
-def test_get_books_endpoint(client: FlaskClient, published_date: str, authors: List[str], sort: str,
+def test_get_books_endpoint(client: FlaskClient, published_date: str, author: List[str], sort: str,
                             page: int, page_size: int, expected_status: int, expected_ids: List[str]
                             ):
     query = {
         'published_date': published_date,
-        'authors': authors,
+        'author': author,
         'sort': sort,
         'page': page,
         'page_size': page_size

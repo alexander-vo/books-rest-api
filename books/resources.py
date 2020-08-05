@@ -8,7 +8,7 @@ class Books(Resource):
     # Creating settings for books endpoint query args
     parser = reqparse.RequestParser()
     parser.add_argument('published_date', type=str, trim=True)
-    parser.add_argument('authors', action='append')
+    parser.add_argument('author', action='append', dest='authors')
     parser.add_argument('sort', type=str, trim=True)
     parser.add_argument('page', type=int, default=1)
     parser.add_argument('page_size', type=int, default=10)
