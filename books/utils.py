@@ -25,7 +25,7 @@ def get_new_books_by_query(query: str) -> List[dict]:
 def parse_book(book: dict) -> dict:
     return {
         '_id': book['id'],
-        'title': book['volumeInfo']['title'],
+        'title': book['volumeInfo'].get('title', ''),
         'authors': book['volumeInfo'].get('authors', ''),
         'published_date': book['volumeInfo'].get('publishedDate', ''),
         'categories': book['volumeInfo'].get('categories', []),
