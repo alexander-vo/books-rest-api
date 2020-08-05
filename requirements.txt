@@ -10,3 +10,5 @@ flask-pymongo==2.3.0
 dnspython==2.0.0
 # HTTP requests lib
 requests==2.24.0
+# Gunicorn for deployment
+gunicorn==20.0.4
