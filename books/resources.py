@@ -1,4 +1,5 @@
 from books import db
+from books.utils import get_new_books_by_query
 from flask_restful import Resource, abort, reqparse
 
 
@@ -36,7 +37,23 @@ class Books(Resource):
 class Book(Resource):
 
     def get(self, book_id):
+        # Search book by id
         result = db.get_book({'_id': book_id})
         if not result:
+            # Raise 404 error if no book
             abort(404, data=[], message=f'No book with id: {book_id}')
         return {'data': [result]}
+
+
+class AddBooks(Resource):
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('q', type=str, required=True, location='json', help='q param need to be defined')
+
+    def post(self):
+        args = self.parser.parse_args()
+        # Getting books from Google books API
+        books = get_new_books_by_query(args['q'])
+        # Saving new books
+        result = db.save_books(books)
+        return {'data': [result]}, 201

@@ -4,7 +4,7 @@ from typing import Type
 
 from config import Config
 from books.db import mongo
-from books.resources import Books, Book
+from books.resources import Books, Book, AddBooks
 
 
 def create_app(app_config: Type[Config] = Config) -> Flask:
@@ -32,7 +32,8 @@ def create_app(app_config: Type[Config] = Config) -> Flask:
         return response
 
     # Adding api resources
-    api.add_resource(Books, '/books/')
+    api.add_resource(Books, '/books')
     api.add_resource(Book, '/books/<string:book_id>')
+    api.add_resource(AddBooks, '/db')
 
     return app
