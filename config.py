@@ -18,7 +18,7 @@ class Config:
     MONGO_CLUSTER_NAME = getenv('MONGO_CLUSTER_NAME', '')
 
     @property
-    def MONGO_URI(self):  # Note: all caps for the Flask config variable MONGO_URI
+    def MONGO_URI(self):  # noqa
         return f'mongodb+srv://{self.MONGO_USERNAME}:{self.MONGO_USER_PASSWORD}' \
                f'@{self.MONGO_CLUSTER_NAME}/{self.MONGO_DB_NAME}?retryWrites=true&w=majority'
 
