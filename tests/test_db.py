@@ -1,19 +1,13 @@
 from typing import List
 
 import pytest
-from flask.testing import FlaskClient
 
 from config import TestingConfig
 from books import db
 
 
-# client var doesn't use but needed for fixture triggering
-def test_db_name(client: FlaskClient):
-    """
-    Testing connected Database name
-    :param client: needed to init fixture
-    :return:
-    """
+@pytest.mark.usefixtures('client')
+def test_db_name():
     assert db.mongo.db.name == TestingConfig.MONGO_DB_NAME
 
 
@@ -27,15 +21,7 @@ def test_db_name(client: FlaskClient):
         ('some_random_string', None)
     ]
 )
-def test_get_book_method(book_id: str, expected_title: str):
-    """
-    Testing search by id. Comparing founded book title
-    with expected one
-    Tested id = None and some random string
-    :param book_id: book to search for
-    :param expected_title: expected title
-    :return:
-    """
+def test_get_book_by_id(book_id: str, expected_title: str):
     book = db.get_book({'_id': book_id})
     title = book['title'] if book else None
     assert title == expected_title
@@ -53,14 +39,7 @@ def test_get_book_method(book_id: str, expected_title: str):
         (-3, -5, ['SQz2AAAAQBAJ', 'TdDhBAAAQBAJ', '8KdEAgAAQBAJ', '1rogAgAAQBAJ', '-3HK5oU_OPgC']),
     ]
 )
-def test_get_books_method_pagination(page: int, page_size: int, expected_ids: List[str]):
-    """
-    Testing pagination with defined page size and page
-    :param page: number of page
-    :param page_size: books per page
-    :param expected_ids: expected ids
-    :return:
-    """
+def test_get_books_pagination(page: int, page_size: int, expected_ids: List[str]):
     pagination = {'page': page, 'page_size': page_size}
     books = db.get_books({}, (), pagination)
     ids = [book['_id'] for book in books]
@@ -79,13 +58,7 @@ def test_get_books_method_pagination(page: int, page_size: int, expected_ids: Li
         (2012, []),
     ]
 )
-def test_get_books_method_search_by_published_date(published_date: str, expected_ids: List[str]):
-    """
-    Testing search by published_date with defined date and expected ids
-    :param published_date: Searchable date string
-    :param expected_ids: expected ids
-    :return:
-    """
+def test_get_books_search_by_published_date(published_date: str, expected_ids: List[str]):
     search_filter = {'published_date': published_date}
     books = db.get_books(search_filter, (), {})
     ids = [book['_id'] for book in books]
@@ -105,13 +78,7 @@ def test_get_books_method_search_by_published_date(published_date: str, expected
         (['David Rogers', 'Ruth Perry'], ['wFMO7R-qvDUC']),
     ]
 )
-def test_get_books_method_search_by_authors(authors: List[str], expected_ids: List[str]):
-    """
-    Testing search by authors
-    :param authors: authors names
-    :param expected_ids: expected ids
-    :return:
-    """
+def test_get_books_search_by_authors(authors: List[str], expected_ids: List[str]):
     search_filter = {'authors': {'$all': authors}}
     books = db.get_books(search_filter, (), {})
     ids = [book['_id'] for book in books]
@@ -125,13 +92,7 @@ def test_get_books_method_search_by_authors(authors: List[str], expected_ids: Li
         (-1, ['3XGlBAAAQBAJ', 'ariQBAAAQBAJ', 'TdDhBAAAQBAJ', 'glFsAwAAQBAJ', 'arsgAgAAQBAJ']),
     ]
 )
-def test_get_books_method_sorting(order: int, expected_ids: List[str]):
-    """
-    Testing sorting by published_date. Comparing only first 5 entries
-    :param order: ASCENDING (1) | DESCEND(-1)
-    :param expected_ids:
-    :return:
-    """
+def test_get_books_sorting(order: int, expected_ids: List[str]):
     sort = ('published_date', order)
     books = db.get_books({}, sort, {'page_size': 5})
     ids = [book['_id'] for book in books]
@@ -147,7 +108,10 @@ TEST_SAVE_BOOKS_BOOKS_PARAM = [
     [{'_id': 'T6', 'title': 'T6_T'}, {'_id': 'T2', 'title': 'T2_TT'}, {'_id': 'T3', 'title': 'T3_TT'}],
     # test 0 new books and 3 updated
     [{'_id': 'T4', 'title': 'T4_TT'}, {'_id': 'T5', 'title': 'T5_TT'}, {'_id': 'T6', 'title': 'T6_TT'}],
-    [],  # test 0 new books and 0 updated
+    # test 0 new books and 0 updated
+    [],
+    # test 0 new books and 0 updated with unchanged books
+    [{'_id': 'T5', 'title': 'T5_TT'}, {'_id': 'T6', 'title': 'T6_TT'}]
 ]
 
 TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM = [
@@ -155,6 +119,7 @@ TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM = [
     {'inserted_ids': ['T4', 'T5'], 'updated_count': 1},
     {'inserted_ids': ['T6'], 'updated_count': 2},
     {'inserted_ids': [], 'updated_count': 3},
+    {'inserted_ids': [], 'updated_count': 0},
     {'inserted_ids': [], 'updated_count': 0},
 ]
 
@@ -164,12 +129,5 @@ TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM = [
     list(zip(TEST_SAVE_BOOKS_BOOKS_PARAM, TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM))
 )
 def test_save_books(books: List[dict], expected_results: dict):
-    """
-    Testing insert of new books and update of existing ones
-    :param books: New/Changed books
-    :param expected_results: dict with expected results
-    :return:
-    """
     result = db.save_books(books)
-    assert result['inserted_ids'] == expected_results['inserted_ids']
-    assert result['updated_count'] == expected_results['updated_count']
+    assert result == expected_results

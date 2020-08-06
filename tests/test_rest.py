@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest
-from flask import Response
 from flask.testing import FlaskClient
 
 
@@ -14,7 +13,7 @@ from flask.testing import FlaskClient
         ('KUSn4G6eiCUC', 200, 'A Hobbit Devotional'),
     ]
 )
-def test_get_book_by_id_endpoint_success(client: FlaskClient, book_id: str, expected_status: int, expected_title: str):
+def test_get_book_by_id_success(client: FlaskClient, book_id: str, expected_status: int, expected_title: str):
     response = client.get(f'/api/books/{book_id}')
     assert response.content_type == 'application/json'
     assert response.status_code == expected_status
@@ -29,7 +28,7 @@ def test_get_book_by_id_endpoint_success(client: FlaskClient, book_id: str, expe
         (2221221, 404),
     ]
 )
-def test_get_book_by_id_endpoint_fail(client: FlaskClient, book_id: str, expected_status: int):
+def test_get_book_by_id_fail(client: FlaskClient, book_id: str, expected_status: int):
     response = client.get(f'/api/books/{book_id}')
     assert response.status_code == expected_status
 
@@ -53,9 +52,13 @@ def test_get_book_by_id_endpoint_fail(client: FlaskClient, book_id: str, expecte
 
     ]
 )
-def test_get_books_endpoint(client: FlaskClient, published_date: str, author: List[str], sort: str,
-                            page: int, page_size: int, expected_status: int, expected_ids: List[str]
-                            ):
+def test_get_books_endpoint(
+        client: FlaskClient,
+        published_date: str,
+        author: List[str],
+        sort: str,
+        page: int, page_size: int, expected_status: int, expected_ids: List[str]
+):
     query = {
         'published_date': published_date,
         'author': author,
@@ -63,7 +66,7 @@ def test_get_books_endpoint(client: FlaskClient, published_date: str, author: Li
         'page': page,
         'page_size': page_size
     }
-    response = client.get('/api/books', query_string=query)  # type: Response
+    response = client.get('/api/books', query_string=query)
 
     assert response.content_type == 'application/json'
     assert response.status_code == expected_status

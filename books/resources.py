@@ -1,3 +1,5 @@
+import pymongo
+
 from books import db
 from books.utils import get_new_books_by_query
 from flask_restful import Resource, abort, reqparse
@@ -14,16 +16,20 @@ class Books(Resource):
     parser.add_argument('page_size', type=int, default=10)
 
     def get(self):
+        """
+        GET request parser for Books resource.
+        Takes additional query params for filtering like 'author' and 'published_date'.
+        Sorting allowed using 'sort' param. Pagination is enabled using 'page' and 'page_size' params.
+        """
         args = self.parser.parse_args()
 
-        # Creating pagination dict for books
         pagination = {'page': args['page'], 'page_size': args['page_size']}
 
-        # Creating sort dict for published_date field if args['sort'] exists
-        # else sort will be an None
-        sort = args['sort'] and ('published_date', -1 if args['sort'].startswith('-') else 1)
+        sort = ()
+        if args['sort']:
+            order = pymongo.DESCENDING if args['sort'].startswith('-') else pymongo.ASCENDING
+            sort = ('published_date', order)
 
-        # Adding filter params if exists
         search_filter = {}
         if args['authors']:
             search_filter.update({'authors': {'$all': args['authors']}})
@@ -37,10 +43,13 @@ class Books(Resource):
 class Book(Resource):
 
     def get(self, book_id):
-        # Search book by id
+        """
+        GET request parser for Book resource.
+        Takes additional path param 'book_id'.
+        Performs search by 'book_id'
+        """
         result = db.get_book({'_id': book_id})
         if not result:
-            # Raise 404 error if no book
             abort(404, data=[], message=f'No book with id: {book_id}')
         return {'data': [result]}
 
@@ -51,9 +60,14 @@ class AddBooks(Resource):
     parser.add_argument('q', type=str, required=True, location='json', help='q param need to be defined')
 
     def post(self):
+        """
+        POST request parser for AddBooks resource.
+        Additional param 'q' is required in POST body.
+        Search books by search param 'q' using Google Books API.
+        Save new books to db or updates existing ones.
+        """
         args = self.parser.parse_args()
         # Getting books from Google books API
         books = get_new_books_by_query(args['q'])
-        # Saving new books
         result = db.save_books(books)
         return {'data': [result]}, 201
