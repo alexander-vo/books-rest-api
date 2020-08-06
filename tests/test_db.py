@@ -3,14 +3,14 @@ from typing import List
 import pytest
 from pymongo import ASCENDING, DESCENDING
 
+from books.db import mongo, books_collection
 from books.models import Pagination, Book
 from config import TestingConfig
-from books import db
 
 
 @pytest.mark.usefixtures('client')
 def test_db_name():
-    assert db.mongo.db.name == TestingConfig.MONGO_DB_NAME
+    assert mongo.db.name == TestingConfig.MONGO_DB_NAME
 
 
 @pytest.mark.parametrize(
@@ -24,7 +24,7 @@ def test_db_name():
     ]
 )
 def test_get_book_by_id(book_id: str, expected_title: str):
-    book = db.get_book({'_id': book_id})
+    book = books_collection.get_book_by_id(book_id)
     title = book.title if book else None
     assert title == expected_title
 
@@ -43,7 +43,7 @@ def test_get_book_by_id(book_id: str, expected_title: str):
 )
 def test_get_books_pagination(page: int, page_size: int, expected_ids: List[str]):
     pagination = Pagination(page=page, page_size=page_size)
-    books = db.get_books({}, (), pagination)
+    books = books_collection.get_books({}, (), pagination)
     ids = [book.id for book in books]
     assert ids == expected_ids
 
@@ -62,7 +62,7 @@ def test_get_books_pagination(page: int, page_size: int, expected_ids: List[str]
 )
 def test_get_books_search_by_published_date(published_date: str, expected_ids: List[str]):
     search_filter = {'published_date': published_date}
-    books = db.get_books(search_filter, ())
+    books = books_collection.get_books(search_filter, ())
     ids = [book.id for book in books]
     assert ids == expected_ids
 
@@ -82,7 +82,7 @@ def test_get_books_search_by_published_date(published_date: str, expected_ids: L
 )
 def test_get_books_search_by_authors(authors: List[str], expected_ids: List[str]):
     search_filter = {'authors': {'$all': authors}}
-    books = db.get_books(search_filter, ())
+    books = books_collection.get_books(search_filter, ())
     ids = [book.id for book in books]
     assert ids == expected_ids
 
@@ -96,7 +96,7 @@ def test_get_books_search_by_authors(authors: List[str], expected_ids: List[str]
 )
 def test_get_books_sorting(order: int, expected_ids: List[str]):
     sort = ('published_date', order)
-    books = db.get_books({}, sort, Pagination(page_size=5))
+    books = books_collection.get_books({}, sort, Pagination(page_size=5))
     ids = [book.id for book in books]
     assert ids == expected_ids
 
@@ -132,5 +132,5 @@ TEST_SAVE_BOOKS_EXPECTED_RESULTS_PARAM = [
 )
 def test_save_books(books: List[dict], expected_results: dict):
     books_to_save = [Book(**book) for book in books]
-    result = db.save_books(books_to_save)
+    result = books_collection.save_books(books_to_save)
     assert result == expected_results

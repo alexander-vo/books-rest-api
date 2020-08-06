@@ -1,6 +1,6 @@
 import pymongo
 
-from books import db
+from books.db import books_collection
 from books.models import Pagination
 from books.utils import get_new_books_by_query
 from flask_restful import Resource, abort, reqparse
@@ -37,7 +37,7 @@ class Books(Resource):
         if args['published_date']:
             search_filter.update({'published_date': args['published_date']})
 
-        books = db.get_books(search_filter, sort, pagination)
+        books = books_collection.get_books(search_filter, sort, pagination)
         return {'data': [book.dict(by_alias=True) for book in books]}
 
 
@@ -49,7 +49,7 @@ class Book(Resource):
         Takes additional path param 'book_id'.
         Performs search by 'book_id'
         """
-        result = db.get_book({'_id': book_id})
+        result = books_collection.get_book_by_id(book_id)
         if not result:
             abort(404, data=[], message=f'No book with id: {book_id}')
         return {'data': [result.dict(by_alias=True)]}
@@ -70,5 +70,5 @@ class AddBooks(Resource):
         args = self.parser.parse_args()
         # Getting books from Google books API
         books = get_new_books_by_query(args['q'])
-        result = db.save_books(books)
+        result = books_collection.save_books(books)
         return {'data': [result.dict()]}, 201

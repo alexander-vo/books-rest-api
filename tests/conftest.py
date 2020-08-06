@@ -6,7 +6,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from books import create_app
-from books.db import mongo
+from books.db import mongo, books_collection
 from config import TestingConfig
 
 TESTS_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)))
@@ -24,7 +24,7 @@ def client(app: Flask) -> FlaskClient:
     """Returns app test client and loads test data from tests_books.json"""
     with open(os.path.join(TESTS_DIR, 'test_books.json'), 'r') as f:
         data = json.load(f)
-    mongo.db.books.insert_many(data)
+    books_collection.collection.insert_many(data)
     with app.test_client() as client:
         yield client
-    mongo.db.books.remove()
+    books_collection.collection.remove()
