@@ -1,4 +1,6 @@
+import os
 from os import getenv
+from typing import Type
 
 
 class Config:
@@ -16,8 +18,8 @@ class Config:
     MONGO_CLUSTER_NAME = getenv('MONGO_CLUSTER_NAME', '')
 
     @property
-    def MONGO_URI(self):    # Note: all caps for the Flask config variable MONGO_URI
-        return f'mongodb+srv://{self.MONGO_USERNAME}:{self.MONGO_USER_PASSWORD}'\
+    def MONGO_URI(self):  # Note: all caps for the Flask config variable MONGO_URI
+        return f'mongodb+srv://{self.MONGO_USERNAME}:{self.MONGO_USER_PASSWORD}' \
                f'@{self.MONGO_CLUSTER_NAME}/{self.MONGO_DB_NAME}?retryWrites=true&w=majority'
 
 
@@ -39,3 +41,17 @@ class TestingConfig(Config):
     ENV = 'development'
     TESTING = True
     MONGO_DB_NAME = getenv('TEST_MONGO_DB_NAME', '')
+
+
+def get_config() -> Type[Config]:
+    """
+    Returns configuration class depends on environment variable ENV
+    """
+    env = os.getenv('ENV')
+
+    if env == 'prod':
+        return Config
+    if env == 'test':
+        return TestingConfig
+
+    return DevelopmentConfig
