@@ -13,10 +13,12 @@ In code used with additional query parameters:
 ```json
 {
   "langRestrict": "en",
-  "maxResults": 40,  // max value for books per page
+  "maxResults": 40,
   "startIndex": 0
 }
 ```
+
+`"maxResults": 40` - max value for books per page
 
 Example:
 
