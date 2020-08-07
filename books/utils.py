@@ -31,9 +31,9 @@ def get_new_books_by_query(query: str) -> List[Book]:
 
 def parse_book(book: dict) -> Book:
     return Book(
-        id=book['id'],
+        _id=book['id'],
         title=book['volumeInfo'].get('title', ''),
-        authors=book['volumeInfo'].get('authors', ''),
+        authors=book['volumeInfo'].get('authors', []),
         published_date=book['volumeInfo'].get('publishedDate', ''),
         categories=book['volumeInfo'].get('categories', []),
         average_rating=book['volumeInfo'].get('averageRating', 0),

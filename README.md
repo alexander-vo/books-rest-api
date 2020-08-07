@@ -118,11 +118,14 @@ gunicorn==20.0.4
 `pip install -r requirements.txt`
 4) Load your environment variables described [here](#Configuration)
 5) Run tests \
-`pytest`
+`pytest` \
+Tests should be executed using an empty database defined in `TEST_MONGO_DB_NAME` 
+[here](#Configuration)
 6) Run application \
 `python app.py`
 7) Check application home page [http://localhost:5000](http://localhost:5000). 
-You should be redirected to the [http://localhost:5000/api/books](http://localhost:5000/api/books) endpoint.
+You should be redirected to the 
+[http://localhost:5000/api/books](http://localhost:5000/api/books) endpoint
 
 ## Database
 
